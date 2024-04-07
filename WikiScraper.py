@@ -30,6 +30,7 @@ structuredData = {}
 #Next, we loop through the pages array
 for page in pages:
     #form the full url
+    print(page)
     url = "http://wikipedia.org/wiki/"+page
     request = requests.get(url, {"user-agent":"frgo-admin@frgo.org|github.com:3koo2"})
     #now, find all <a> tags (hyperlinks) that are not absolute urls
@@ -52,4 +53,6 @@ elif resultsformat == "tsv":
         for item in structuredData[key]:
             results.write("\t"+item)
         results.write("\n")
+
+print("Done! Saved to "+resultsfname)
 results.close()
