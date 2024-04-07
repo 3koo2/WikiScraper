@@ -2,13 +2,14 @@
 import requests #request thingy
 from bs4 import BeautifulSoup #html parser
 import re #regex
+import json #json
 
 print("WikiScraper")
 #First, we need to know which pages to scrape
 pagesstring = input("Enter the titles of the pages to scrape (separate with tabs):\n")
 pages = pagesstring.split("\t")
 #if pagesstring starts with "FROM-FILE:", search the following file for the pages to scrape
-if pagesstring[0:9] == "FROM-FILE:":
+if pagesstring[0:10] == "FROM-FILE:":
     f = open(pagesstring[10:], "r")
     pages = f.read().split("\n")#from file is split by newline, not tab
 
@@ -17,9 +18,9 @@ resultsfname = input("Enter results file name:\n")
 
 validresultsformats = ["json", "tsv"]
 #json example
-#{"articleName":["linkto","linkto"]} (probably more efficient)
+#{"articleName":["linkto","linkto"]} (probably more efficient, more standard)
 #tsv example 
-#ArticleName    linkto    linkto (probably more foolproof)
+#ArticleName    linkto    linkto (probably more foolproof, easier on the eyes)
 
 resultsformat = ""
 while resultsformat not in validresultsformats:
@@ -33,9 +34,22 @@ for page in pages:
     request = requests.get(url, {"user-agent":"frgo-admin@frgo.org|github.com:3koo2"})
     #now, find all <a> tags (hyperlinks) that are not absolute urls
     soup = BeautifulSoup(request.content, "html.parser")
-    atags = soup.find_all("a", {"href":re.compile("^(?!https?)^(?!#)")})
+    body = soup.find("div", {"id":"bodyContent"})
+    atags = body.find_all("a", {"href":re.compile("^(?!https?)^(?!#)^/wiki/(?!Wikipedia:)(?!Category:)(?!Special:)(?!File:)(?!Help:)(?!Template:)(?!Template_talk:)(?!Portal:)")})
     structuredData[page] = []
     for i in atags:
         structuredData[page].append(i.attrs["href"]) 
 
-print(structuredData) 
+#format + save data
+#first, open file
+results = open(resultsfname, "w")
+if resultsformat == "json":
+    results.write(json.dumps(structuredData))
+elif resultsformat == "tsv":
+    keys = structuredData.keys()
+    for key in keys:
+        results.write(key)
+        for item in structuredData[key]:
+            results.write("\t"+item)
+        results.write("\n")
+results.close()
