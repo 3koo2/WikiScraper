@@ -2,7 +2,7 @@
 
 WikiScraper is a project intended to scrape wikipedia and record hyperlinks
 
-** note! wikiscraper does not take contents from the wikipedia pages - ONLY LINKS **
+**note! wikiscraper does not take contents from the wikipedia pages - ONLY LINKS**
 
 It is written in python
 
